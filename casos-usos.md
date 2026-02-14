@@ -27,3 +27,6 @@
 | :--- | :--- |
 | **RF04** | **Control de Acceso y Registro de Auditoría** |
 | **Descripción:** | El sistema debe restringir el acceso a la información sensible basándose en perfiles de usuario autorizados. Cada vez que un funcionario consulte o modifique datos de usuarios, el sistema debe generar un registro (log) automático e inalterable que detalle fecha, hora, usuario y acción realizada para prevenir fugas de información. |
+
+
+![Diagrama de Casos de Uso](img/casosdeuso.png)
