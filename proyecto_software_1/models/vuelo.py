@@ -4,10 +4,10 @@ class Vuelo:
         self.__aerolinea = aerolinea
         self.__cupos = cupos
 
-    # Avisa cuántas sillas quedan en el avión[cite: 30].
+    # Avisa cuántas sillas quedan en el avión
     def get_cupos(self): 
         return self.__cupos
     
-    # Actualiza las sillas después de vender un tiquete[cite: 31].
+    # Actualiza las sillas después de vender un tiquete
     def actualizar_cupos(self, cantidad: int):
         self.__cupos += cantidad
