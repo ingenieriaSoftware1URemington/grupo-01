@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import date
 
 class Reserva(ABC):
-    def _init_(self, id_reserva: int, fecha: date, turista: object):
+    def __init__(self, id_reserva: int, fecha: date, turista: object):
         self._id_reserva = id_reserva
         self._fecha = fecha
         self._turista = turista

@@ -13,7 +13,7 @@ class HotelController:
             return None
 
         # Validar que las plazas sean un número positivo
-        if plazas <= 0:
+        if plazas < 0:
             print("Error: las plazas deben ser mayor a 0.")
             return None
 

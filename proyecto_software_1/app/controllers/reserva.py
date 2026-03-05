@@ -3,7 +3,7 @@ from models.reservaVuelo import ReservaVuelo
 from datetime import date
 
 class ReservaController:
-    def _init_(self):
+    def __init__(self):
         # Lista en memoria de todas las reservas
         self.__reservas = []
         self.__contador_id = 0  # Genera ids automáticamente
