@@ -1,75 +1,51 @@
 from models.vuelo import Vuelo
+from exceptions.agencia_exceptions import (
+    RegistroDuplicadoError, DatoVacioError,
+    ValorInvalidoError, NoEncontradoError
+)
 
 class VueloController:
     def __init__(self):
-        # Lista en memoria de todos los vuelos registrados
         self.__vuelos = []
 
-    # ── REGISTRAR ──────────────────────────────────────────
-    def registrar_vuelo(self, id_vuelo: int, aerolinea: str,
-                         cupos: int) -> Vuelo:
-        # Validar que no exista un vuelo con el mismo id
+    def registrar_vuelo(self, id_vuelo: int, aerolinea: str, cupos: int) -> Vuelo:
         if self.__buscar_por_id(id_vuelo):
-            print(f"Error: ya existe un vuelo con el id {id_vuelo}.")
-            return None
-
-        # Validar que la aerolínea no esté vacía
+            raise RegistroDuplicadoError(f"Ya existe un vuelo con el id {id_vuelo}.")
         if not aerolinea.strip():
-            print("Error: la aerolínea no puede estar vacía.")
-            return None
-
-        # Validar que los cupos sean positivos
+            raise DatoVacioError("El nombre de la aerolinea no puede estar vacio.")
         if cupos <= 0:
-            print("Error: los cupos deben ser mayor a 0.")
-            return None
-
+            raise ValorInvalidoError("Los cupos deben ser mayor a 0.")
         vuelo = Vuelo(id_vuelo, aerolinea, cupos)
         self.__vuelos.append(vuelo)
         print(f"Vuelo '{aerolinea}' registrado exitosamente.")
         return vuelo
 
-    # ── CONSULTAR ──────────────────────────────────────────
     def consultar_vuelos(self) -> list:
-        if not self.__vuelos:
-            print("No hay vuelos registrados.")
-            return []
         return self.__vuelos
 
     def consultar_vuelo(self, id_vuelo: int) -> Vuelo:
         vuelo = self.__buscar_por_id(id_vuelo)
         if not vuelo:
-            print(f"Error: no se encontró el vuelo con id {id_vuelo}.")
-            return None
+            raise NoEncontradoError(f"No se encontro el vuelo con id {id_vuelo}.")
         return vuelo
 
-    # ── CONSULTAR DISPONIBILIDAD ───────────────────────────
     def consultar_disponibilidad(self, id_vuelo: int) -> int:
         vuelo = self.__buscar_por_id(id_vuelo)
         if not vuelo:
-            print(f"Error: no se encontró el vuelo con id {id_vuelo}.")
-            return None
-
+            raise NoEncontradoError(f"No se encontro el vuelo con id {id_vuelo}.")
         cupos = vuelo.get_cupos()
-        print(f"Vuelo '{vuelo.get_aerolinea()}': "
-              f"{cupos} cupos disponibles.")
+        print(f"Vuelo '{vuelo.get_aerolinea()}': {cupos} cupos disponibles.")
         return cupos
 
-    # ── ACTUALIZAR ─────────────────────────────────────────
-    def actualizar_aerolinea(self, id_vuelo: int,
-                              nueva_aerolinea: str) -> bool:
+    def actualizar_aerolinea(self, id_vuelo: int, nueva_aerolinea: str) -> bool:
         vuelo = self.__buscar_por_id(id_vuelo)
         if not vuelo:
-            print(f"Error: no se encontró el vuelo con id {id_vuelo}.")
-            return False
-
+            raise NoEncontradoError(f"No se encontro el vuelo con id {id_vuelo}.")
         if not nueva_aerolinea.strip():
-            print("Error: el nombre de la aerolínea no puede estar vacío.")
-            return False
-
+            raise DatoVacioError("El nombre de la aerolinea no puede estar vacio.")
         print(f"Vuelo #{id_vuelo} actualizado a '{nueva_aerolinea}'.")
         return True
 
-    # ── PRIVADO: búsqueda interna ──────────────────────────
     def __buscar_por_id(self, id_vuelo: int) -> Vuelo:
         for vuelo in self.__vuelos:
             if vuelo.get_id() == id_vuelo:

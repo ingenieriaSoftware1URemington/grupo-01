@@ -1,81 +1,70 @@
 from models.reservaHotel import ReservaHotel
 from models.reservaVuelo import ReservaVuelo
+from exceptions.agencia_exceptions import (
+    NoEncontradoError, SinDisponibilidadError, EstadoInvalidoError
+)
 from datetime import date
 
 class ReservaController:
     def __init__(self):
-        # Lista en memoria de todas las reservas
         self.__reservas = []
-        self.__contador_id = 0  # Genera ids automáticamente
+        self.__contador_id = 0
 
-    # ── PRIVADO: genera id único ───────────────────────────
     def __generar_id(self) -> int:
         self.__contador_id += 1
         return self.__contador_id
 
-    # ── CREAR RESERVA HOTEL ────────────────────────────────
     def crear_reserva_hotel(self, turista: object, hotel: object,
                              sucursal: object, fecha: date) -> ReservaHotel:
         reserva = ReservaHotel(self.__generar_id(), fecha, turista, hotel)
+        if not reserva.confirmar():
+            raise SinDisponibilidadError(
+                f"No hay plazas disponibles en '{hotel.get_nombre()}'."
+            )
+        self.__reservas.append(reserva)
+        sucursal.agregar_reserva(reserva)
+        print(f"Reserva #{reserva.get_id()} de hotel confirmada "
+              f"para '{turista.get_nombre()}'.")
+        return reserva
 
-        if reserva.confirmar():
-            self.__reservas.append(reserva)
-            sucursal.agregar_reserva(reserva)  # Trazabilidad
-            print(f"Reserva #{reserva.get_id()} de hotel confirmada "
-                  f"para '{turista.get_nombre()}'.")
-            return reserva
-
-        print(f"Error: no hay plazas disponibles en '{hotel.get_nombre()}'.")
-        return None
-
-    # ── CREAR RESERVA VUELO ────────────────────────────────
     def crear_reserva_vuelo(self, turista: object, vuelo: object,
                              sucursal: object, fecha: date) -> ReservaVuelo:
         reserva = ReservaVuelo(self.__generar_id(), fecha, turista, vuelo)
+        if not reserva.confirmar():
+            raise SinDisponibilidadError(
+                f"No hay cupos disponibles en vuelo '{vuelo.get_aerolinea()}'."
+            )
+        self.__reservas.append(reserva)
+        sucursal.agregar_reserva(reserva)
+        print(f"Reserva #{reserva.get_id()} de vuelo confirmada "
+              f"para '{turista.get_nombre()}'.")
+        return reserva
 
-        if reserva.confirmar():
-            self.__reservas.append(reserva)
-            sucursal.agregar_reserva(reserva)  # Trazabilidad
-            print(f"Reserva #{reserva.get_id()} de vuelo confirmada "
-                  f"para '{turista.get_nombre()}'.")
-            return reserva
-
-        print(f"Error: no hay cupos disponibles en vuelo "
-              f"'{vuelo.get_aerolinea()}'.")
-        return None
-
-    # ── CANCELAR RESERVA ───────────────────────────────────
     def cancelar_reserva(self, id_reserva: int) -> bool:
         reserva = self.__buscar_por_id(id_reserva)
-
         if not reserva:
-            print(f"Error: no se encontró la reserva #{id_reserva}.")
-            return False
-
+            raise NoEncontradoError(f"No se encontro la reserva #{id_reserva}.")
         if reserva.get_estado() != "Confirmada":
-            print(f"Error: la reserva #{id_reserva} "
-                  f"no está confirmada.")
-            return False
-
+            raise EstadoInvalidoError(
+                f"La reserva #{id_reserva} no esta confirmada, "
+                f"su estado actual es '{reserva.get_estado()}'."
+            )
         reserva.cancelar()
         print(f"Reserva #{id_reserva} cancelada exitosamente.")
         return True
 
-    # ── CONSULTAR ──────────────────────────────────────────
     def consultar_reservas(self) -> list:
-        if not self.__reservas:
-            print("No hay reservas registradas.")
-            return []
         return self.__reservas
 
     def consultar_por_turista(self, id_turista: int) -> list:
         resultado = [r for r in self.__reservas
                      if r.get_turista().get_id() == id_turista]
         if not resultado:
-            print(f"No se encontraron reservas para el turista #{id_turista}.")
+            raise NoEncontradoError(
+                f"No se encontraron reservas para el turista #{id_turista}."
+            )
         return resultado
 
-    # ── PRIVADO: búsqueda interna ──────────────────────────
     def __buscar_por_id(self, id_reserva: int) -> object:
         for reserva in self.__reservas:
             if reserva.get_id() == id_reserva:
